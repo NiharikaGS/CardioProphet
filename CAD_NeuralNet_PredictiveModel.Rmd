@@ -1,0 +1,312 @@
+---
+title: "Neural Network Model to Predict the Risk of Occcurance of Coronary Artery
+  Disease"
+date: "2023-03-02"
+output: 
+  html_document:
+    theme: cosmo
+    highlight: pygment
+    toc: true
+    toc_float: false
+    toc_depth: 4
+---
+
+---
+title: "Neural Network Model to Predict the Risk of Occcurance of Coronary Artery
+  Disease"
+date: "2023-03-02"
+output: 
+  html_document:
+    theme: cosmo
+    highlight: pygment
+    toc: true
+    toc_float: false
+    toc_depth: 4
+---
+
+```{r}
+# Reading a CSV file named "heart_statlog_cleveland_hungary_raw.csv" and assigning it to an R object named "CAD"
+CAD <- read.csv("/Users/niharika/Desktop/HDA Project/heart_statlog_cleveland_hungary_raw.csv")
+```
+
+```{r}
+# Loading the dplyr library for data manipulation and transformation
+library(dplyr)
+
+
+# Providing a quick overview of the structure of the "CAD" object
+glimpse(CAD)
+```
+
+```{r}
+# Displaying the first few rows of the "CAD" object to get a quick view of the data
+head(CAD)
+```
+
+```{r}
+# Providing a summary of the "CAD" object to get an overview of the basic statistics of the dataset
+summary(CAD)
+```
+
+```{r}
+# Checking for missing values in the "CAD" object using the "is.na()" function
+# Returns a logical value of "TRUE" if there are any missing values, and "FALSE" otherwise
+any(is.na(CAD))
+
+# Calculating the number of missing values in each column of the "CAD" object using the "colSums()" function
+# Returns a vector of the counts of missing values for each column
+colSums(is.na(CAD))
+```
+
+```{r}
+# Retrieving the column names of the "CAD" object
+colnames(CAD)
+```
+
+```{r}
+# Creating a boxplot for each column in the "CAD" object
+boxplot(CAD)
+```
+
+```{r}
+# Creating a boxplot for resting blood pressure, cholesterol, and maximum heart rate
+# The boxplots are created using the specified columns in the "CAD" object
+boxplot(CAD$resting.bp.s, CAD$cholesterol, CAD$max.heart.rate)
+```
+
+```{r}
+# Creating a boxplot for resting systolic blood pressure
+# The boxplot is created using the specified column in the "CAD" object
+boxplot(CAD$resting.bp.s)
+```
+
+```{r}
+# Calculating the mean resting systolic blood pressure using the "mean()" function
+Mean_rst_bp<-mean(CAD$resting.bp.s)
+
+# Displaying the calculated mean resting systolic blood pressure
+Mean_rst_bp
+
+# Calculating the standard deviation of resting systolic blood pressure using the "sd()" function
+Std.dv_rst_bp<-sd(CAD$resting.bp.s)
+
+# Adding a new column "z_val" to the "CAD" object that stores the absolute z-score for each value of resting systolic blood pressure
+CAD$z_val<- abs((Mean_rst_bp-CAD$resting.bp.s)/Std.dv_rst_bp)
+
+# Creating a new object "Clean_CAD_ds" that contains only the rows with z-score less than 3 (i.e., the data points within 3 standard deviations from the mean)
+Clean_CAD_ds<-CAD[which(CAD$z_val<3),]
+
+# Displaying a summary of the "Clean_CAD_ds" object using the "summary()" function
+summary(Clean_CAD_ds)
+```
+
+```{r}
+# Creating a boxplot for resting systolic blood pressure using the "Clean_CAD_ds" object
+# The boxplot is created using the specified column in the "Clean_CAD_ds" object
+boxplot(Clean_CAD_ds$resting.bp.s)
+```
+
+```{r}
+# Calculating the mean cholesterol using the "mean()" function
+Mean_chol<-mean(CAD$cholesterol)
+
+# Displaying the calculated mean cholesterol
+Mean_chol
+
+# Calculating the standard deviation of cholesterol using the "sd()" function
+Std.dv_chol<-sd(CAD$cholesterol)
+
+# Adding a new column "z_val" to the "CAD" object that stores the absolute z-score for each value of cholesterol
+CAD$z_val<- abs((Mean_chol-CAD$cholesterol)/Std.dv_chol)
+
+# Creating a new object "Clean_CAD_ds" that contains only the rows with z-score less than 3 (i.e., the data points within 3 standard deviations from the mean)
+Clean_CAD_ds<-CAD[which(CAD$z_val<3),]
+
+# Displaying a summary of the "Clean_CAD_ds" object using the "summary()" function
+summary(Clean_CAD_ds)
+```
+
+```{r}
+# Creating a boxplot for cholesterol using the "Clean_CAD_ds" object
+# The boxplot is created using the specified column in the "Clean_CAD_ds" object
+boxplot(Clean_CAD_ds$cholesterol)
+```
+
+```{r}
+# Calculating the mean maximum heart rate achieved using the "mean()" function
+Mean_H_rate<-mean(CAD$max.heart.rate)
+
+# Displaying the calculated mean maximum heart rate achieved
+Mean_H_rate
+
+# Calculating the standard deviation of maximum heart rate achieved using the "sd()" function
+Std.dv_H_rate<-sd(CAD$max.heart.rate)
+
+# Adding a new column "z_val" to the "CAD" object that stores the absolute z-score for each value of maximum heart rate achieved
+CAD$z_val<- abs((Mean_H_rate-CAD$max.heart.rate)/Std.dv_H_rate)
+
+# Creating a new object "Clean_CAD_ds" that contains only the rows with z-score less than 1.5 (i.e., the data points within 1.5 standard deviations from the mean)
+Clean_CAD_ds<-CAD[which(CAD$z_val<1.5),]
+
+# Displaying a summary of the "Clean_CAD_ds" object using the "summary()" function
+summary(Clean_CAD_ds)
+```
+
+```{r}
+# Creating a boxplot for the maximum heart rate achieved using the "Clean_CAD_ds" object
+# The boxplot is created using the specified column in the "Clean_CAD_ds" object
+boxplot(Clean_CAD_ds$max.heart.rate)
+```
+
+```{r}
+# Creating a multi-boxplot for resting blood pressure, cholesterol, and maximum heart rate achieved using the "Clean_CAD_ds" object
+# The boxplot is created using the specified columns in the "Clean_CAD_ds" object
+boxplot(Clean_CAD_ds$resting.bp.s, Clean_CAD_ds$cholesterol, Clean_CAD_ds$max.heart.rate)
+```
+
+
+```{r}
+# Creating a new object "CADNN" that contains the cleaned data from "Clean_CAD_ds"
+CADNN <-Clean_CAD_ds
+
+# Printing summary statistics for the "CADNN" object
+summary(CADNN)
+```
+
+```{r}
+# Loading the "psych" library for additional statistical analysis
+library(psych)
+```
+
+```{r}
+# Generating descriptive statistics for the "CADNN" object
+# The function "describe()" returns a table with the mean, standard deviation, and other measures for each variable in the object
+describe(CADNN)
+```
+
+```{r}
+# Standardizing the variables in the "CADNN" object using min-max scaling
+# This loop iterates over the first 11 columns of "CADNN" and replaces each value with a standardized value using the min-max scaling method
+for(i in 1:11){CADNN[,i] <- (CADNN[,i]-min(CADNN[,i]))/(max(CADNN[,i])-min(CADNN[,i]))}
+
+# Printing summary statistics for the "CADNN" object after standardizing
+summary(CADNN)
+```
+
+
+```{r}
+# Generating descriptive statistics for the "CADNN" object after standardizing
+# The function "describe()" returns a table with the mean, standard deviation, and other measures for each variable in the object
+describe(CADNN)
+```
+
+
+```{r}
+# Generating a random sample of 90% of the rows in the "CADNN" object for training data
+# The "sample()" function is used to randomly select a specified number of rows from the object
+# The number of rows selected is 90% of the total number of rows in the object
+index = sample(1:nrow(CADNN),0.9*nrow(CADNN))
+ 
+# Printing randomly specified rows for training data              
+index
+```
+
+```{r}
+# Creating a new object "CADNN_training_data" with the rows selected for training data.
+CADNN_training_data <- CADNN[index,]
+
+# Provides a summary of the variables in "CADNN_training_data" using the "summary()" function.
+summary(CADNN_training_data)
+```
+
+```{r}
+# Generating descriptive statistics for the "CADNN_training_data" object after standardizing and selecting for training data
+# The function "describe()" returns a table with the mean, standard deviation, and other measures for each variable in the object
+describe(CADNN_training_data)
+```
+
+```{r}
+# Loading neuralnet library
+library(neuralnet)
+
+# Loading graphics library
+library(graphics)
+
+# Generating a neural network model using the "neuralnet" function from the "neuralnet" package
+# The model is trained on the "CADNN_training_data" object and has one hidden layer with 3 neurons
+# The "target" variable is the dependent variable and the other 11 variables are the independent variables
+nn.model <- neuralnet(target ~ age + sex + chest.pain.type + resting.bp.s + cholesterol + fasting.blood.sugar + resting.ecg + max.heart.rate + exercise.angina + oldpeak + ST.slope, data=CADNN_training_data, hidden=c(5), lifesign.step = 1000, linear.output=FALSE)
+
+# Plotting the neural network model using the "plot" function from the "graphics" package
+# The plot shows the structure of the neural network, including the input and output layers, the hidden layer, and the connections between neurons
+plot(nn.model)
+```
+
+
+```{r}
+# Creating a test dataset by excluding the rows with the index values sampled for the training dataset. 
+CADNN_test_data <- CADNN[-index,]
+
+# Printing the summary of the test dataset, which shows the count, mean, median, minimum, and maximum values for each column of the dataset
+summary(CADNN_test_data)
+```
+
+```{r}
+# Generating a descriptive summary of the CADNN_test_data dataset using the describe() function from the psych package.
+describe(CADNN_test_data)
+```
+
+
+```{r}
+# This code is using the predict() function from the neuralnet package to predict the target variable (presence or absence of CAD) for the test dataset CADNN_test_data using the neural network model nn.model that was trained on the training dataset CADNN_training_data
+output <- predict(nn.model, CADNN_test_data, rep=1, all.units = FALSE)
+```
+
+
+```{r}
+# Assigning the predicted values to a variable named "prediction"
+prediction <- output *(max(CADNN[-index,9])-min(CADNN[-index,9]))+min(CADNN[-index,9])
+
+# Assigning the actual values to a variable named "actual"
+actual <- CADNN[-index,9]
+```
+
+
+```{r}
+# Creating a contingency table of the actual target values (actual) versus the predicted values (prediction)
+# Predicted values are rounded using the round() 
+# The resulting table shows the number of observations that fall into each possible combination of actual and predicted values
+Proportion_table <- table(actual,round(prediction))
+
+# Printing Proprtion_table
+Proportion_table
+```
+
+```{r}
+# Calculating the proportion of correct predictions made by the neural network model, which is stored in the variable Proportion_of_Correct_Prediction
+# The numerator represents the sum of correct predictions, i.e., the number of times the actual and predicted values matched, while the denominator represents the total number of predictions made 
+# The result is the proportion of correct predictions, which ranges between 0 and 1, with higher values indicating better predictive accuracy
+Proportion_of_Correct_Prediction <- sum(diag(Proportion_table)) / sum(Proportion_table)
+
+# Printing Proportion_of_Correct_Prediction
+Proportion_of_Correct_Prediction
+```
+
+```{r}
+# Calculating the proportion of incorrect predictions made by the neural network model
+# Proportion_of_Incorrect_Prediction is a variable storing the result of the calculation
+# The calculation is done by subtracting the proportion of correct predictions (sum of true positives and true negatives) from 1
+Proportion_of_Incorrect_Prediction=1-Proportion_of_Correct_Prediction
+
+# Printing Proportion_of_Incorrect_Prediction
+Proportion_of_Incorrect_Prediction
+```
+
+
+
+
+
+
+
+
+
